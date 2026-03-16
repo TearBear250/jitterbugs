@@ -104,6 +104,14 @@ class _AudioWorker:
             self._stream.close()
         if self._pa is not None:
             self._pa.terminate()
+        if self._thread is not None:
+            self._thread.join(timeout=2.0)
+            if self._thread.is_alive():
+                import sys
+                print(
+                    "[jitterbugs] Warning: audio worker thread did not stop within timeout.",
+                    file=sys.stderr,
+                )
 
     # ------------------------------------------------------------------
     def _callback(self, in_data, frame_count, time_info, status):
@@ -113,7 +121,7 @@ class _AudioWorker:
         try:
             self._q.put_nowait(audio)
         except queue.Full:
-            pass  # drop oldest implicitly by not blocking
+            pass  # discard current chunk rather than block the audio callback
         return (None, pyaudio.paContinue)
 
     def _process_loop(self) -> None:
