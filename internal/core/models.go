@@ -52,9 +52,10 @@ func (r *Report) ExitCode() int {
 
 // ChecksConfig controls which checks are enabled.
 type ChecksConfig struct {
-	RequiredFiles *bool `json:"required_files"`
-	CI            *bool `json:"ci"`
-	Secrets       *bool `json:"secrets"`
+	RequiredFiles   *bool `json:"required_files"`
+	CI              *bool `json:"ci"`
+	Secrets         *bool `json:"secrets"`
+	ConflictMarkers *bool `json:"conflict_markers"`
 }
 
 // Config holds the optional per-repo .qaqc.json configuration.
@@ -78,6 +79,8 @@ func (c *Config) CheckEnabled(name string) bool {
 		flag = c.Checks.CI
 	case "secrets":
 		flag = c.Checks.Secrets
+	case "conflict_markers":
+		flag = c.Checks.ConflictMarkers
 	}
 	return flag == nil || *flag
 }

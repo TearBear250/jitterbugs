@@ -122,7 +122,7 @@ func TestLoadConfig_InvalidJSON(t *testing.T) {
 
 func TestConfig_CheckEnabled_Defaults(t *testing.T) {
 	cfg := &Config{}
-	for _, name := range []string{"required_files", "ci", "secrets"} {
+	for _, name := range []string{"required_files", "ci", "secrets", "conflict_markers"} {
 		if !cfg.CheckEnabled(name) {
 			t.Errorf("check %q should be enabled by default", name)
 		}

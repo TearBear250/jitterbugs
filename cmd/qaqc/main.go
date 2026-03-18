@@ -60,6 +60,7 @@ func runScan(args []string) {
 	runner.AddCheck(checks.NewRequiredFilesCheck(cfg))
 	runner.AddCheck(checks.NewCIDetectCheck())
 	runner.AddCheck(checks.NewSecretsCheck())
+	runner.AddCheck(checks.NewConflictMarkersCheck())
 
 	rpt := runner.Run()
 
