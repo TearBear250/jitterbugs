@@ -1,14 +1,12 @@
-// qaqc is a cross-platform CLI tool that scans a local git repository for
-// common quality and security issues and emits structured reports.
+// qaqc is a cross-platform CLI tool that scans git repositories for common
+// quality and security issues and emits structured reports.
 //
 // Usage:
 //
 //	qaqc scan [flags]
+//	qaqc audit-github [flags]
 //
-// Flags:
-//
-//	--path  <dir>   Path to the git repository to scan (default: current directory)
-//	--html  <file>  Write an HTML report to this file in addition to JSON stdout
+// Run "qaqc <command> --help" for flags.
 package main
 
 import (
@@ -21,15 +19,16 @@ import (
 	"github.com/backbiten/jitterbugs/internal/report"
 )
 
-const usage = `qaqc – QAQC scanner for local git repositories
+const usage = `qaqc – QAQC scanner for git repositories
 
 Usage:
   qaqc <command> [flags]
 
 Commands:
-  scan    Scan a repository and print a JSON report to stdout
+  scan           Scan a local repository and print a JSON report to stdout
+  audit-github   Audit all repositories for a GitHub organisation or user
 
-Run "qaqc scan --help" for scan-specific flags.
+Run "qaqc <command> --help" for command-specific flags.
 `
 
 func main() {
@@ -41,6 +40,8 @@ func main() {
 	switch os.Args[1] {
 	case "scan":
 		runScan(os.Args[2:])
+	case "audit-github":
+		runAuditGitHub(os.Args[2:])
 	case "--help", "-h", "help":
 		fmt.Fprint(os.Stdout, usage)
 	default:

@@ -55,6 +55,7 @@ type ChecksConfig struct {
 	RequiredFiles *bool `json:"required_files"`
 	CI            *bool `json:"ci"`
 	Secrets       *bool `json:"secrets"`
+	PullRequests  *bool `json:"pull_requests"`
 }
 
 // Config holds the optional per-repo .qaqc.json configuration.
@@ -78,6 +79,8 @@ func (c *Config) CheckEnabled(name string) bool {
 		flag = c.Checks.CI
 	case "secrets":
 		flag = c.Checks.Secrets
+	case "pull_requests":
+		flag = c.Checks.PullRequests
 	}
 	return flag == nil || *flag
 }

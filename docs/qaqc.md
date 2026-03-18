@@ -1,8 +1,8 @@
 # QAQC – Repository Quality and Security Scanner
 
-`qaqc` is a cross-platform CLI tool that scans a **local git repository** for
-common quality and security issues. It produces a JSON report to stdout and an
-optional HTML report to a file.
+`qaqc` is a cross-platform CLI tool that scans **local** or **remote GitHub**
+repositories for common quality, security, and process issues. It produces a
+JSON report to stdout and an optional HTML report to a file.
 
 ---
 
@@ -10,6 +10,8 @@ optional HTML report to a file.
 
 - [Build & Install](#build--install)
 - [Usage](#usage)
+  - [scan – local repository](#scan--local-repository)
+  - [audit-github – all repos for an org or user](#audit-github--all-repos-for-an-org-or-user)
 - [Check Descriptions](#check-descriptions)
 - [Exit Codes](#exit-codes)
 - [Configuration](#configuration)
@@ -43,6 +45,8 @@ go install github.com/backbiten/jitterbugs/cmd/qaqc@latest
 
 ## Usage
 
+### scan – local repository
+
 ```
 qaqc scan [flags]
 
@@ -51,7 +55,7 @@ Flags:
   --html  <file>   Write an HTML report to this file in addition to JSON stdout
 ```
 
-### Examples
+#### Examples
 
 Scan the current directory:
 
@@ -79,6 +83,53 @@ Use the exit code in a CI pipeline:
 
 ---
 
+### audit-github – all repos for an org or user
+
+Audits **all repositories** for a GitHub organisation or user account
+simultaneously, using the GitHub REST API. No local clones are required.
+
+```
+qaqc audit-github [flags]
+
+Flags:
+  --org          GitHub organisation to audit (mutually exclusive with --user)
+  --user         GitHub user account to audit  (mutually exclusive with --org)
+  --token        GitHub personal access token (default: $GITHUB_TOKEN)
+  --html         Write an HTML report to this file in addition to JSON stdout
+  --concurrency  Number of repositories to scan concurrently (default: 5)
+```
+
+#### Examples
+
+Audit all repos for an organisation (token from environment):
+
+```bash
+export GITHUB_TOKEN=ghp_...
+./qaqc audit-github --org my-org
+```
+
+Audit a personal account and write an HTML report:
+
+```bash
+./qaqc audit-github --user octocat --token ghp_... --html audit.html > audit.json
+```
+
+Run at most 10 repos in parallel:
+
+```bash
+./qaqc audit-github --org my-org --concurrency 10
+```
+
+#### Checks run per repository
+
+| Check | Basis | Description |
+|-------|-------|-------------|
+| Required Files | Community Profile API | README, LICENSE (fail); CONTRIBUTING.md, SECURITY.md (warn) |
+| CI Configuration | Contents API | .github/workflows/ has at least one .yml/.yaml file |
+| Pull Requests | Pulls API | Stale PRs (>30 days), expired PRs (>90 days), PRs without reviews or descriptions |
+
+---
+
 ## Check Descriptions
 
 ### 1. Required Files (`required_files`)
@@ -103,8 +154,8 @@ Detects GitHub Actions workflow files under `.github/workflows/`.
 
 ### 3. Secret Scan (`secrets`)
 
-Scans all git-tracked files (or all non-`.git` files if `git` is unavailable)
-for common secret patterns.
+*(Local `scan` only.)* Scans all git-tracked files (or all non-`.git` files if
+`git` is unavailable) for common secret patterns.
 
 | Pattern                    | Confidence |
 |----------------------------|------------|
@@ -119,6 +170,17 @@ for common secret patterns.
 
 Binary files and files larger than 1 MiB are skipped. Secret values are
 **redacted** in the report (only the first four characters are shown).
+
+### 4. Pull Requests (`pull_requests`)
+
+*(`audit-github` only.)* Audits open pull requests for hygiene issues.
+
+| Finding | Pattern key | Severity |
+|---------|-------------|----------|
+| No updates for > 90 days | `expired-pr` | **fail** |
+| No updates for > 30 days | `stale-pr` | warning |
+| No description/body | `missing-description` | warning |
+| No reviews on a non-draft PR | `no-review` | warning |
 
 ---
 
@@ -136,7 +198,7 @@ Binary files and files larger than 1 MiB are skipped. Secret values are
 ## Configuration
 
 Place a `.qaqc.json` file in the root of the target repository to customise
-the scanner behaviour.
+the `scan` command behaviour.
 
 ```json
 {
@@ -160,7 +222,9 @@ the scanner behaviour.
 
 ## Output Format
 
-JSON report structure (emitted to stdout):
+### Single-repo (`scan`)
+
+JSON report structure emitted to stdout:
 
 ```json
 {
@@ -190,6 +254,31 @@ JSON report structure (emitted to stdout):
           "match": "AKIA****************"
         }
       ]
+    }
+  ]
+}
+```
+
+### Multi-repo (`audit-github`)
+
+The JSON output wraps individual per-repo reports:
+
+```json
+{
+  "owner": "my-org",
+  "timestamp": "2024-01-15T12:00:00Z",
+  "repos": [
+    {
+      "repo_path": "my-org/repo-a",
+      "timestamp": "2024-01-15T12:00:01Z",
+      "overall_status": "pass",
+      "results": [ ... ]
+    },
+    {
+      "repo_path": "my-org/repo-b",
+      "timestamp": "2024-01-15T12:00:02Z",
+      "overall_status": "warning",
+      "results": [ ... ]
     }
   ]
 }
