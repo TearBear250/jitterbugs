@@ -25,3 +25,25 @@ See [docs/SAFETY-SCOPE-POLICY.md](docs/SAFETY-SCOPE-POLICY.md) for the full scop
 See [docs/build.md](docs/build.md) for instructions on building the desktop
 application locally (Linux binary, `.deb` package, Windows `.exe`) and for
 an overview of the CI pipeline.
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0 (GPLv3)**.
+See [LICENSE](LICENSE) for the full license text.
+
+## Trademark
+
+The names "Jitterbug" and "Jitterbugs" and any associated logos are trademarks of the
+project owners.  The GPLv3 license grants you the right to use and redistribute the code,
+but does **not** grant trademark rights.  See [TRADEMARK.md](TRADEMARK.md) for details on
+what is and is not permitted for forks and derivative works.
+
+## Security Posture
+
+Jitterbugs is designed around a **VPN-only / no inbound ports** security model.  Cameras
+and recording devices are kept on a private network; remote access requires the owner to
+connect via an authenticated VPN tunnel—no cloud relay with shared credentials, no UPnP,
+no open port forwarding.
+
+See [docs/SECURITY_ARCHITECTURE.md](docs/SECURITY_ARCHITECTURE.md) for a full description
+of the recommended network topology, access controls, and operational guidelines.
