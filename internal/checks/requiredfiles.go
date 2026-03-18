@@ -10,9 +10,7 @@ import (
 	"github.com/backbiten/jitterbugs/internal/core"
 )
 
-// defaultRequired defines the mandatory files (fail if absent) and recommended
-// files (warn if absent).
-var mandatoryFiles = []string{"README", "LICENSE"}
+// recommendedFiles lists files whose absence triggers a warning (not a failure).
 var recommendedFiles = []string{"SECURITY.md", "CONTRIBUTING.md"}
 
 type requiredFilesCheck struct {
