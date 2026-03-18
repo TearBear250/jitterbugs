@@ -8,6 +8,7 @@
 // Flags:
 //
 //	--path  <dir>   Path to the git repository to scan (default: current directory)
+//	--url   <url>   Remote git URL to clone and scan (e.g. https://github.com/owner/repo)
 //	--html  <file>  Write an HTML report to this file in addition to JSON stdout
 package main
 
@@ -18,6 +19,7 @@ import (
 
 	"github.com/backbiten/jitterbugs/internal/checks"
 	"github.com/backbiten/jitterbugs/internal/core"
+	"github.com/backbiten/jitterbugs/internal/remote"
 	"github.com/backbiten/jitterbugs/internal/report"
 )
 
@@ -52,8 +54,23 @@ func main() {
 func runScan(args []string) {
 	fs := flag.NewFlagSet("scan", flag.ExitOnError)
 	repoPath := fs.String("path", ".", "Path to the git repository to scan")
+	repoURL := fs.String("url", "", "Remote git URL to clone and scan (e.g. https://github.com/owner/repo)")
 	htmlOut := fs.String("html", "", "Optional path to write an HTML report file")
 	_ = fs.Parse(args)
+
+	if *repoURL != "" {
+		if *repoPath != "." {
+			fmt.Fprintln(os.Stderr, "error: --url and --path are mutually exclusive; provide one or the other")
+			os.Exit(1)
+		}
+		dir, cleanup, err := remote.Clone(*repoURL)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error cloning repository: %v\n", err)
+			os.Exit(3)
+		}
+		defer cleanup()
+		*repoPath = dir
+	}
 
 	cfg := core.LoadConfig(*repoPath)
 	runner := core.NewRunner(*repoPath, cfg)
