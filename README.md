@@ -20,6 +20,18 @@ jitterbugs is a simple, privacy-respecting camera/recorder application. It is de
 
 See [docs/SAFETY-SCOPE-POLICY.md](docs/SAFETY-SCOPE-POLICY.md) for the full scope and data-handling policy.
 
+## Auto-updater prototype
+
+An experimental, demo-only secure auto-updater is provided in `examples/`.
+It fetches a signed manifest over HTTPS, verifies the RSA signature with an
+embedded public key, downloads the artifact, checks its SHA-256 checksum, and
+installs atomically using a temp-file + swap with backup/rollback support.
+
+See [examples/README_UPDATER.md](examples/README_UPDATER.md) for a full walkthrough,
+including key generation, manifest signing, HTTPS hosting, and CLI usage.
+
+> **For demo/testing only – see the README for production recommendations.**
+
 ## Building & Packaging
 
 See [docs/build.md](docs/build.md) for instructions on building the desktop
