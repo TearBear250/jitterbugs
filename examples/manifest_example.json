@@ -1,0 +1,15 @@
+{
+  "_comment": "Sample manifest for local testing. NOT FOR PRODUCTION. Replace URLs, sha256, and version with real values.",
+  "_sha256_note": "The sha256 below is the hash of an empty string (placeholder). Replace with the real artifact hash before use.",
+  "name": "jitterbugs",
+  "version": "2026.03.19",
+  "release_date": "2026-03-19T12:00:00Z",
+  "files": [
+    {
+      "filename": "jitterbugs-2026.03.19.tar.gz",
+      "url": "https://localhost:8443/updates/jitterbugs-2026.03.19.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "notes": "Demo release for local testing of the auto-updater prototype."
+}

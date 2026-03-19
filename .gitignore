@@ -32,3 +32,11 @@ Thumbs.db
 # Go build artifacts
 /qaqc
 /cmd/qaqc/qaqc
+
+# Auto-updater demo keys (NEVER commit private keys)
+examples/update_signing_key.pem
+examples/*.sig
+examples/*.sig.b64
+examples/current/
+examples/backup/
+examples/updater.log

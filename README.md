@@ -20,6 +20,12 @@ jitterbugs is a simple, privacy-respecting camera/recorder application. It is de
 
 See [docs/SAFETY-SCOPE-POLICY.md](docs/SAFETY-SCOPE-POLICY.md) for the full scope and data-handling policy.
 
+## Auto-updater prototype
+
+A signed-manifest auto-updater prototype is available for local testing.
+See [examples/README_UPDATER.md](examples/README_UPDATER.md) for setup
+instructions and production hardening recommendations.
+
 ## Building & Packaging
 
 See [docs/build.md](docs/build.md) for instructions on building the desktop
