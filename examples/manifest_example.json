@@ -1,0 +1,13 @@
+{
+  "name": "jitterbugs",
+  "version": "2026.03.19",
+  "release_date": "2026-03-19T12:00:00Z",
+  "files": [
+    {
+      "filename": "jitterbugs-EXAMPLE.tar.gz",
+      "url": "https://localhost:8443/updates/jitterbugs-EXAMPLE.tar.gz",
+      "sha256": "REPLACE_WITH_ACTUAL_SHA256_OF_YOUR_ARTIFACT"
+    }
+  ],
+  "notes": "Example manifest for local testing only. Replace sha256 with the actual checksum of the artifact before use."
+}
