@@ -25,3 +25,20 @@ See [docs/SAFETY-SCOPE-POLICY.md](docs/SAFETY-SCOPE-POLICY.md) for the full scop
 See [docs/build.md](docs/build.md) for instructions on building the desktop
 application locally (Linux binary, `.deb` package, Windows `.exe`) and for
 an overview of the CI pipeline.
+
+## Networked TLS examples
+
+The `examples/` directory contains a self-contained demonstration of how to
+transmit jitter scores securely over HTTPS, with optional **mutual TLS
+(mTLS)**:
+
+- **`examples/server.py`** – aiohttp HTTPS server exposing a `POST /jitter`
+  endpoint that accepts `{"score": <float>}`.
+- **`examples/client.py`** – `requests` client that POSTs a score to the
+  server, presenting a client certificate for mTLS.
+- **`scripts/make-certs.sh`** – helper script that generates a local test CA,
+  server certificate (`localhost`), and client certificate for local testing.
+
+See [examples/README_TLS.md](examples/README_TLS.md) for step-by-step
+instructions, `curl` examples, and guidance on adapting for production
+(ACME/Let's Encrypt, HSM/TPM, certificate rotation).

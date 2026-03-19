@@ -32,3 +32,6 @@ Thumbs.db
 # Go build artifacts
 /qaqc
 /cmd/qaqc/qaqc
+
+# Generated test certificates (created by scripts/make-certs.sh)
+certs/

@@ -3,3 +3,5 @@ opencv-python>=4.8
 mediapipe>=0.10
 librosa>=0.10
 pyaudio>=0.2.14
+aiohttp>=3.8
+requests>=2.28
