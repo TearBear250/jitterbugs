@@ -1,0 +1,105 @@
+# config/policies/plate_policy.yaml
+# jitterbugs — Site Policy for License Plate Recognition (LPR)
+#
+# ⚠️  WARNING: LPR is disabled by default. Do NOT enable it without obtaining
+#     qualified legal advice for each jurisdiction of deployment and ensuring
+#     compliance with all applicable data-protection and surveillance laws.
+#
+# All settings below are the DEFAULTS. Site administrators may override
+# individual keys in a site-specific overlay file; the overlay is merged
+# onto these defaults at runtime.
+
+---
+lpr:
+  # Master switch. Must be explicitly set to true by a site administrator.
+  # Changing this to true requires an approved change-management record.
+  enabled_by_default: false
+
+  # Sites must explicitly opt in before any LPR processing is activated.
+  require_opt_in: true
+
+  # A human operator must review and approve an event before any external
+  # lookup (DMV, law-enforcement, etc.) is triggered. Never set to false
+  # without legal review.
+  require_human_review_before_lookup: true
+
+  # External lookups (vehicle registration databases, law-enforcement
+  # databases, third-party ANPR services) are disabled by default.
+  # Enabling requires a signed Data Processing Agreement and legal sign-off.
+  allow_external_lookup: false
+
+  # Minimum OCR confidence score [0–1] to create a plate_event record.
+  # Events below this threshold are discarded silently.
+  min_plate_confidence: 0.70
+
+  # Minimum detector confidence for the plate bounding box [0–1].
+  min_detection_confidence: 0.60
+
+retention:
+  # Retention period in days for raw frame crops / clips containing plates.
+  # Set to 0 to disable storage of image evidence.
+  image_clips_days: 7
+
+  # Retention period in days for plate_event records (including plate_hash).
+  event_records_days: 30
+
+  # Retention period in days for the human-review audit log.
+  lookup_log_days: 365
+
+  # Retention period in days for watchlist-match records.
+  watchlist_matches_days: 90
+
+repeat_sighting:
+  # Enable repeat-sighting alerts (based on plate_hash comparison only).
+  enabled: true
+
+  # Minimum number of sightings within the window to trigger an alert.
+  threshold_count: 3
+
+  # Time window in minutes for repeat-sighting counting.
+  window_minutes: 60
+
+  # Require human review before escalating a repeat-sighting alert.
+  require_human_review: true
+
+hashing:
+  # Algorithm used for plate hashing. Must be sha256 or stronger.
+  algorithm: sha256
+
+  # SITE_SALT must be set in the deployment secrets store; it must NOT be
+  # committed to source control. This placeholder will cause the system to
+  # refuse to start if not replaced.
+  site_salt: "REPLACE_WITH_SECRET_SITE_SALT"
+
+  # Rotation interval in days. The site_salt should be rotated at least this
+  # often, and immediately after any personnel change.
+  salt_rotation_days: 90
+
+privacy:
+  # Do not store the plain plate text string in any database or log.
+  # Only the salted hash is stored for analytics and de-duplication.
+  store_plain_plate_text: false
+
+  # Store the salted SHA-256 hash of the plate for analytics and de-duplication.
+  store_plate_hash: true
+
+  # Blur / redact plate regions in stored clips. Requires clip storage enabled.
+  blur_plate_in_clips: true
+
+  # Require explicit site-admin consent before enabling LPR in a new location.
+  require_site_admin_consent: true
+
+watchlist:
+  # Enable local (on-device / on-server) watchlist matching.
+  # The watchlist is defined by the site and never shared externally by default.
+  enabled: false
+
+  # Path to the local watchlist file (hashed plates only — no plain text).
+  # File format: one SHA-256 hex digest per line.
+  watchlist_file: "config/watchlists/plate_watchlist.sha256.txt"
+
+  # Require human review before acting on any watchlist match.
+  require_human_review_on_match: true
+
+  # Maximum number of entries in the local watchlist.
+  max_entries: 1000
