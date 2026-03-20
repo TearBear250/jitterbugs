@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jitterbugs.example/schemas/work_order.json",
+  "title": "WorkOrder",
+  "description": "Work order dispatched by jitterbugs to a security partner upon escalation.",
+  "type": "object",
+  "required": [
+    "work_order_id",
+    "event_id",
+    "created_at_utc",
+    "priority",
+    "required_response_level",
+    "location",
+    "sla_deadline_utc",
+    "server_signature"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "work_order_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID v4 assigned by jitterbugs at work-order creation."
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID of the source escalation event that triggered this work order."
+    },
+    "created_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp when the work order was created."
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["P1", "P2", "P3"],
+      "description": "Response urgency. P1 = immediate, P2 = standard, P3 = advisory."
+    },
+    "required_response_level": {
+      "type": "string",
+      "enum": ["IMMEDIATE", "STANDARD", "ADVISORY"],
+      "description": "Maps 1-to-1 with priority: P1→IMMEDIATE, P2→STANDARD, P3→ADVISORY."
+    },
+    "location": {
+      "type": "object",
+      "description": "Location of the terminal box that generated the escalation event.",
+      "required": ["lat", "lon", "accuracy_m", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "WGS-84 latitude in decimal degrees."
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "WGS-84 longitude in decimal degrees."
+        },
+        "accuracy_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5000,
+          "description": "Estimated 1-σ horizontal accuracy in metres."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["GNSS", "AssistedGNSS", "WiFi", "BLE", "Cell", "Manual"],
+          "description": "Technology used to obtain the fix."
+        },
+        "reverse_geocode": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Human-readable address string (best-effort, may be absent)."
+        }
+      }
+    },
+    "site_contact": {
+      "type": "object",
+      "description": "On-site contact for the responding partner (optional).",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "phone": {
+          "type": "string",
+          "description": "E.164 format preferred.",
+          "maxLength": 20
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Short video clip evidence associated with the escalation (optional).",
+      "required": ["clip_url", "clip_hash"],
+      "additionalProperties": false,
+      "properties": {
+        "clip_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Presigned HTTPS URL to download the clip. Valid for 60 minutes."
+        },
+        "clip_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of the clip file, prefixed 'sha256:'.",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "sla_deadline_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC deadline by which the partner must reach ONSCENE state."
+    },
+    "server_signature": {
+      "type": "string",
+      "description": "ed25519 signature by the jitterbugs server over SHA-256(canonical_work_order_json), Base64url-encoded.",
+      "pattern": "^[A-Za-z0-9_-]{86}={0,2}$"
+    }
+  }
+}

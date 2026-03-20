@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jitterbugs.example/schemas/device_manifest.json",
+  "title": "DeviceManifest",
+  "description": "Signed attestation manifest emitted by a jitterbugs terminal box.",
+  "type": "object",
+  "required": [
+    "device_id",
+    "timestamp_utc",
+    "nonce",
+    "firmware_version",
+    "model",
+    "device_key_id",
+    "tamper_flags",
+    "signature"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "device_id": {
+      "type": "string",
+      "description": "Globally unique device identifier assigned at manufacture.",
+      "pattern": "^dev_[A-Za-z0-9]{6,64}$"
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of manifest creation. Must be within ±30 seconds of server time."
+    },
+    "nonce": {
+      "type": "string",
+      "description": "Server-issued challenge nonce, Base64url-encoded (32 bytes).",
+      "pattern": "^[A-Za-z0-9_-]{43}={0,2}$"
+    },
+    "location": {
+      "type": "object",
+      "description": "Best-available location fix at manifest creation time.",
+      "required": ["latitude", "longitude", "accuracy_m", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "WGS-84 latitude in decimal degrees."
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "WGS-84 longitude in decimal degrees."
+        },
+        "accuracy_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5000,
+          "description": "Estimated 1-σ horizontal accuracy in metres."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["GNSS", "AssistedGNSS", "WiFi", "BLE", "Cell", "Manual"],
+          "description": "Technology used to obtain the fix."
+        },
+        "hdop": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "GNSS Horizontal Dilution of Precision (present when source is GNSS or AssistedGNSS)."
+        }
+      }
+    },
+    "location_unavailable": {
+      "type": "boolean",
+      "description": "Set to true when no location source meets the accuracy threshold. Mutually exclusive with 'location'."
+    },
+    "coarse": {
+      "type": "boolean",
+      "description": "True when latitude/longitude have been truncated to ~1 km resolution (coarse mode)."
+    },
+    "firmware_version": {
+      "type": "string",
+      "description": "Semantic version string of device firmware.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "model": {
+      "type": "string",
+      "description": "Device model identifier (e.g. JB-T300).",
+      "maxLength": 64
+    },
+    "device_key_id": {
+      "type": "string",
+      "description": "SHA-256 fingerprint of the device's ed25519 public key, prefixed 'sha256:'.",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "tamper_flags": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 31,
+      "description": "Bitmask of tamper sensor states. 0 = no tamper detected. See DEVICE_LOCATION.md for bit definitions."
+    },
+    "signature": {
+      "type": "string",
+      "description": "ed25519 signature over SHA-256(canonical_manifest_json), Base64url-encoded.",
+      "pattern": "^[A-Za-z0-9_-]{86}={0,2}$"
+    }
+  },
+  "if": {
+    "not": { "required": ["location_unavailable"] }
+  },
+  "then": {
+    "required": ["location"]
+  }
+}
