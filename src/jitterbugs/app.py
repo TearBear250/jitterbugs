@@ -108,12 +108,12 @@ class _AudioWorker:
     # ------------------------------------------------------------------
     def _callback(self, in_data, frame_count, time_info, status):
         """PyAudio callback: enqueue raw frames for the processing thread."""
-        audio = np.frombuffer(in_data, dtype=np.int16).astype(np.float32)
-        audio /= 32768.0  # normalise to [-1, 1]
         try:
+            audio = np.frombuffer(in_data, dtype=np.int16).astype(np.float32)
+            audio /= 32768.0  # normalise to [-1, 1]
             self._q.put_nowait(audio)
-        except queue.Full:
-            pass  # drop oldest implicitly by not blocking
+        except (queue.Full, ValueError, TypeError):
+            pass  # drop frame on overflow or malformed data
         return (None, pyaudio.paContinue)
 
     def _process_loop(self) -> None:
@@ -136,6 +136,7 @@ class _AudioWorker:
                 sr=self._sr,
             )
             voiced = f0[voiced_flag] if voiced_flag is not None else np.array([])
+            voiced = voiced[~np.isnan(voiced)]  # discard NaN frames
             if voiced.size >= 2:
                 self.pitch_hz = float(np.median(voiced))
                 # Jitter proxy: mean absolute cycle-to-cycle difference / mean

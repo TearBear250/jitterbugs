@@ -1,41 +1,13 @@
-import cv2
-import numpy as np
-import pyaudio
-from fer import FER
-import time
+"""Entry point: run the Jitterbugs overlay on camera index 0."""
 
-# Initialize the video capture and necessary variables
-video_capture = cv2.VideoCapture(0)
-emotion_detector = FER()
-score_threshold = 0.5
+import os
+import sys
 
-# Main loop to monitor for jitter
-while True:
-    # Capture frame-by-frame
-    ret, frame = video_capture.read()
-    if not ret:
-        break
+# Allow running this file directly from the repo root without installing the
+# package – insert the src/ tree onto the path before importing.
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-    # Get the emotion predictions
-    emotions = emotion_detector.detect_emotions(frame)
-    if emotions:
-        emotion_scores = emotions[0]['emotions']
-        jitter_score = np.mean([emotion_scores[emotion] for emotion in emotion_scores if emotion_scores[emotion] >= score_threshold])
-    else:
-        jitter_score = 0
+from jitterbugs.app import run  # noqa: E402
 
-    # Here you could add audio variance calculations
-    audio_input = pyaudio.PyAudio()
-    # Capture audio logic goes here...
-
-    # Display the resulting frame with the jitter score
-    cv2.putText(frame, f'Jitter Score: {jitter_score:.2f}', (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    cv2.imshow('Jitter Watch', frame)
-
-    # Break the loop if 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# When everything is done, release the capture
-video_capture.release()
-cv2.destroyAllWindows()
+if __name__ == "__main__":
+    run(camera_index=0)
